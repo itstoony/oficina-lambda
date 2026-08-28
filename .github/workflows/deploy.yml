@@ -28,8 +28,10 @@ jobs:
           sam build
           sam deploy \
             --stack-name oficina-lambda-homolog \
+            --s3-bucket oficina-sam-artifacts-302789973247 \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
+            --capabilities CAPABILITY_IAM \
             --parameter-overrides \
               DBHost=${{ secrets.DB_HOST }} \
               DBPort=${{ secrets.DB_PORT }} \
@@ -59,8 +61,10 @@ jobs:
           sam build
           sam deploy \
             --stack-name oficina-lambda-prod \
+            --s3-bucket oficina-sam-artifacts-302789973247 \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
+            --capabilities CAPABILITY_IAM \
             --parameter-overrides \
               DBHost=${{ secrets.DB_HOST }} \
               DBPort=${{ secrets.DB_PORT }} \
