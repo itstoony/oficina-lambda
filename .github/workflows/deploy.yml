@@ -1,32 +1,21 @@
 name: Deploy Lambda
 
 on:
-  push:
-    branches: [main, homolog]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
+    inputs:
+      ambiente:
+        description: 'Ambiente de deploy'
+        required: true
+        type: choice
+        options:
+          - homolog
+          - producao
 
 jobs:
-
-  test:
-    name: Testes
+  deploy:
+    name: Deploy ${{ github.event.inputs.ambiente }}
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Instalar dependências
-        run: pip install -r requirements.txt pytest
-      - name: Rodar testes
-        run: python -m pytest tests/ -v
-
-  deploy-homolog:
-    name: Deploy Homologação
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/homolog'
-    environment: homolog
+    environment: ${{ github.event.inputs.ambiente == 'producao' && 'production' || 'homolog' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -42,39 +31,7 @@ jobs:
         run: |
           sam build
           sam deploy \
-            --stack-name oficina-lambda-homolog \
-            --no-confirm-changeset \
-            --no-fail-on-empty-changeset \
-            --parameter-overrides \
-              DBHost=${{ secrets.DB_HOST }} \
-              DBPort=${{ secrets.DB_PORT }} \
-              DBName=${{ secrets.DB_NAME }} \
-              DBUser=${{ secrets.DB_USER }} \
-              DBPassword=${{ secrets.DB_PASSWORD }} \
-              JWTSecret=${{ secrets.JWT_SECRET }}
-
-  deploy-prod:
-    name: Deploy Produção
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/main'
-    environment: production
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: sa-east-1
-      - uses: aws-actions/setup-sam@v2
-      - name: Build e Deploy
-        run: |
-          sam build
-          sam deploy \
-            --stack-name oficina-lambda-prod \
+            --stack-name oficina-lambda-${{ github.event.inputs.ambiente }} \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --parameter-overrides \
