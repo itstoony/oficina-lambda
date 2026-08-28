@@ -1,21 +1,17 @@
 name: Deploy Lambda
 
 on:
-  workflow_dispatch:
-    inputs:
-      ambiente:
-        description: 'Ambiente de deploy'
-        required: true
-        type: choice
-        options:
-          - homolog
-          - producao
+  push:
+    branches:
+      - homolog
+      - main
 
 jobs:
-  deploy:
-    name: Deploy ${{ github.event.inputs.ambiente }}
+  deploy-homolog:
+    name: Deploy Homologação
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.ambiente == 'producao' && 'production' || 'homolog' }}
+    if: github.ref == 'refs/heads/homolog'
+    environment: homolog
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -31,7 +27,38 @@ jobs:
         run: |
           sam build
           sam deploy \
-            --stack-name oficina-lambda-${{ github.event.inputs.ambiente }} \
+            --stack-name oficina-lambda-homolog \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --parameter-overrides \
+              DBHost=${{ secrets.DB_HOST }} \
+              DBPort=${{ secrets.DB_PORT }} \
+              DBName=${{ secrets.DB_NAME }} \
+              DBUser=${{ secrets.DB_USER }} \
+              DBPassword=${{ secrets.DB_PASSWORD }} \
+              JWTSecret=${{ secrets.JWT_SECRET }}
+
+  deploy-producao:
+    name: Deploy Produção
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: sa-east-1
+      - uses: aws-actions/setup-sam@v2
+      - name: Build e Deploy
+        run: |
+          sam build
+          sam deploy \
+            --stack-name oficina-lambda-prod \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --parameter-overrides \
