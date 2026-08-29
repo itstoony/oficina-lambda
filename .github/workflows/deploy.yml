@@ -5,12 +5,21 @@ on:
     branches:
       - homolog
       - main
+  workflow_dispatch:
+    inputs:
+      ambiente:
+        description: 'Ambiente de deploy'
+        required: true
+        type: choice
+        options:
+          - homolog
+          - producao
 
 jobs:
   deploy-homolog:
     name: Deploy Homologação
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/homolog'
+    if: github.ref == 'refs/heads/homolog' || (github.event_name == 'workflow_dispatch' && github.event.inputs.ambiente == 'homolog')
     environment: homolog
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +52,7 @@ jobs:
   deploy-producao:
     name: Deploy Produção
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.ambiente == 'producao')
     environment: production
     steps:
       - uses: actions/checkout@v4
