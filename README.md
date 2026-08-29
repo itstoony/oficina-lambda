@@ -20,27 +20,33 @@ Function Serverless AWS Lambda para autenticação de clientes por CPF.
 
 ```
 POST /auth/login
-Body: { "cpf": "529.982.247-25" }
-Response: { "token": "eyJ...", "clienteId": "uuid", "nome": "Nome" }
+Content-Type: application/json
+
+Body:     { "cpf": "529.982.247-25" }
+Sucesso:  { "token": "eyJ...", "clienteId": "uuid", "nome": "Nome" }
+Erro:     { "erro": "mensagem" }
 ```
+
+## Fluxo de branches
+
+```
+develop → homolog (deploy automático) → main (deploy automático via PR)
+```
+
+- `main` protegida: PR obrigatório com 1 aprovação + CI verde
+- Push em `homolog` → deploy automático em homologação
+- Merge em `main` → deploy automático em produção
 
 ## Execução local
 
 ```bash
-pip install -r requirements.txt
-sam build
-sam local start-api
-curl -X POST http://localhost:3000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"cpf": "529.982.247-25"}'
-```
-
-## Testes
-
-```bash
-pip install pytest
+pip install -r requirements.txt pytest
 python -m pytest tests/ -v
 ```
+
+## Testes com Postman
+
+Importe o arquivo `postman/oficina-lambda.postman_collection.json` no Postman.
 
 ## Deploy manual
 
@@ -48,12 +54,7 @@ python -m pytest tests/ -v
 sam build && sam deploy --guided
 ```
 
-## CI/CD
-
-- Push em `homolog` → deploy automático em homologação
-- Push em `main` (via PR) → deploy automático em produção
-
-## Secrets necessários no GitHub
+## Secrets necessários no GitHub (por environment)
 
 | Secret | Descrição |
 |---|---|
