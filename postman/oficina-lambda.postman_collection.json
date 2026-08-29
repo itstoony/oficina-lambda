@@ -1,0 +1,92 @@
+{
+  "info": {
+    "name": "oficina-lambda",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "CPF inválido",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cpf\": \"111.111.111-11\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://fpwmtfk2k4.execute-api.sa-east-1.amazonaws.com/Prod/auth/login",
+          "protocol": "https",
+          "host": ["fpwmtfk2k4", "execute-api", "sa-east-1", "amazonaws", "com"],
+          "path": ["Prod", "auth", "login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Sem CPF",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://fpwmtfk2k4.execute-api.sa-east-1.amazonaws.com/Prod/auth/login",
+          "protocol": "https",
+          "host": ["fpwmtfk2k4", "execute-api", "sa-east-1", "amazonaws", "com"],
+          "path": ["Prod", "auth", "login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "CPF válido (sem banco)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cpf\": \"529.982.247-25\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://fpwmtfk2k4.execute-api.sa-east-1.amazonaws.com/Prod/auth/login",
+          "protocol": "https",
+          "host": ["fpwmtfk2k4", "execute-api", "sa-east-1", "amazonaws", "com"],
+          "path": ["Prod", "auth", "login"]
+        }
+      },
+      "response": []
+    }
+  ]
+}
