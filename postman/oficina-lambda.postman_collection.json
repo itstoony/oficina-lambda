@@ -1,0 +1,148 @@
+{
+  "info": {
+    "name": "oficina-lambda",
+    "description": "Testa a Lambda de autenticação por CPF.\n\nO CPF precisa estar cadastrado na tabela 'clientes' do banco via API admin antes de autenticar.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "CPF inválido (deve retornar 400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cpf\": \"111.111.111-11\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://fpwmtfk2k4.execute-api.sa-east-1.amazonaws.com/Prod/auth/login",
+          "protocol": "https",
+          "host": ["fpwmtfk2k4", "execute-api", "sa-east-1", "amazonaws", "com"],
+          "path": ["Prod", "auth", "login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Sem CPF (deve retornar 400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://fpwmtfk2k4.execute-api.sa-east-1.amazonaws.com/Prod/auth/login",
+          "protocol": "https",
+          "host": ["fpwmtfk2k4", "execute-api", "sa-east-1", "amazonaws", "com"],
+          "path": ["Prod", "auth", "login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "CPF não cadastrado (deve retornar 404)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cpf\": \"529.982.247-25\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://fpwmtfk2k4.execute-api.sa-east-1.amazonaws.com/Prod/auth/login",
+          "protocol": "https",
+          "host": ["fpwmtfk2k4", "execute-api", "sa-east-1", "amazonaws", "com"],
+          "path": ["Prod", "auth", "login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "CPF cadastrado — retorna JWT",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const json = pm.response.json();",
+              "    pm.collectionVariables.set('tokenCliente', json.token);",
+              "    console.log('✅ Token JWT do cliente salvo');",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cpf\": \"{{cpfCliente}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://fpwmtfk2k4.execute-api.sa-east-1.amazonaws.com/Prod/auth/login",
+          "protocol": "https",
+          "host": ["fpwmtfk2k4", "execute-api", "sa-east-1", "amazonaws", "com"],
+          "path": ["Prod", "auth", "login"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "cpfCliente",
+      "value": "529.982.247-25",
+      "description": "CPF do cliente cadastrado via API admin"
+    },
+    {
+      "key": "tokenCliente",
+      "value": "",
+      "description": "Token JWT retornado pela Lambda"
+    }
+  ]
+}
