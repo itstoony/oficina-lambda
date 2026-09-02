@@ -10,24 +10,45 @@ Function Serverless AWS Lambda para autenticação de clientes por CPF.
 
 ## Tecnologias
 
-- Python 3.12
-- AWS Lambda + API Gateway
-- AWS SAM CLI
-- psycopg2 (PostgreSQL)
-- PyJWT
+| Tecnologia | Uso |
+|---|---|
+| Python 3.12 | Runtime da Lambda |
+| AWS Lambda | Execução serverless |
+| AWS API Gateway | Roteamento HTTP |
+| AWS SAM CLI | Build e deploy |
+| psycopg2 | Conexão com PostgreSQL |
+| PyJWT | Geração de tokens JWT HS256 |
 
-## Endpoint
+## Arquitetura
 
 ```
-POST /auth/login
-Content-Type: application/json
-
-Body:     { "cpf": "529.982.247-25" }
-Sucesso:  { "token": "eyJ...", "clienteId": "uuid", "nome": "Nome" }
-Erro:     { "erro": "mensagem" }
+Cliente
+  │
+  ▼
+AWS API Gateway
+https://fpwmtfk2k4.execute-api.sa-east-1.amazonaws.com/Prod/auth/login
+  │
+  ▼
+Lambda (oficina-autenticacao)
+  ├── Valida CPF (algoritmo dígitos verificadores)
+  ├── Consulta cliente no RDS PostgreSQL
+  └── Retorna JWT HS256 (exp: 24h)
 ```
 
-## Fluxo de branches
+## Endpoint ativo
+
+| Recurso | URL |
+|---|---|
+| **POST /auth/login** | `https://fpwmtfk2k4.execute-api.sa-east-1.amazonaws.com/Prod/auth/login` |
+| **Postman Collection** | [postman/oficina-lambda.postman_collection.json](postman/oficina-lambda.postman_collection.json) |
+
+```
+Body:    { "cpf": "529.982.247-25" }
+Sucesso: { "token": "eyJ...", "clienteId": "uuid", "nome": "Nome" }
+Erro:    { "erro": "mensagem" }
+```
+
+## Fluxo de branches e CI/CD
 
 ```
 develop → homolog (deploy automático) → main (deploy automático via PR)
@@ -36,6 +57,7 @@ develop → homolog (deploy automático) → main (deploy automático via PR)
 - `main` protegida: PR obrigatório com 1 aprovação + CI verde
 - Push em `homolog` → deploy automático em homologação
 - Merge em `main` → deploy automático em produção
+- Stack CloudFormation: `oficina-lambda-homolog` / `oficina-lambda-prod`
 
 ## Execução local
 
@@ -43,10 +65,6 @@ develop → homolog (deploy automático) → main (deploy automático via PR)
 pip install -r requirements.txt pytest
 python -m pytest tests/ -v
 ```
-
-## Testes com Postman
-
-Importe o arquivo `postman/oficina-lambda.postman_collection.json` no Postman.
 
 ## Deploy manual
 
